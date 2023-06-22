@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/distance")
 class DistanceController(val distanceCalculationService: DistanceCalculationService) {
 
-    private val dsCodeRegex: Regex = """[A-Z ]{2,8}""".toRegex()
+    private val dsCodeRegex: Regex = """[A-Z ]{2,6}""".toRegex()
 
     @GetMapping("/{startStationID}/{endStationID}")
     @ResponseBody
