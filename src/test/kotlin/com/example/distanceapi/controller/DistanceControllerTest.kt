@@ -1,4 +1,4 @@
-package com.example.distanceapi.controller;
+package com.example.distanceapi.controller
 
 import com.example.distanceapi.exception.TrainStationNotFoundException
 import com.example.distanceapi.exception.TrainStationTypeException
@@ -11,17 +11,14 @@ import com.example.distanceapi.service.DistanceCalculationService
 import com.example.distanceapi.service.HaversineDistanceCalculationService
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 
 @SpringBootTest
@@ -111,13 +108,13 @@ internal class DistanceControllerTest() {
         every { calculationServiceMockk.calculateDistanceTrainStation("FF", "BJUF", TrainStationType.FV, DistanceUnit.KILOMETER) } throws TrainStationTypeException(TrainStationType.FV, TrainStationType.RV)
 
         val responseOne = mvc.get("/api/v1/distance/FF/BJUF").andExpect {
-            status { isBadRequest() }
+            status { isNotFound() }
         }
 
         every { calculationServiceMockk.calculateDistanceTrainStation("BJUF", "FF", TrainStationType.FV, DistanceUnit.KILOMETER) } throws TrainStationTypeException(TrainStationType.FV, TrainStationType.RV)
 
         val responseTwo = mvc.get("/api/v1/distance/BJUF/FF").andExpect {
-            status { isBadRequest() }
+            status { isNotFound() }
         }
     }
 
@@ -129,13 +126,24 @@ internal class DistanceControllerTest() {
         every { dataRepository.findTrainStationByDSCode("BJUF", TrainStationType.RV) } throws TrainStationTypeException(TrainStationType.FV, TrainStationType.RV)
 
         val responseOne = mvc.get("/api/v1/distance/FF/BJUF").andExpect {
-            status { isBadRequest() }
+            status { isNotFound() }
         }
 
         every { dataRepository.findTrainStationByDSCode("BJUF", TrainStationType.RV) } throws TrainStationTypeException(TrainStationType.FV, TrainStationType.RV)
         every { dataRepository.findTrainStationByDSCode("FF", TrainStationType.FV) } returns trainStationTestOne
 
         val responseTwo = mvc.get("/api/v1/distance/BJUF/FF").andExpect {
+            status { isNotFound() }
+        }
+    }
+
+    @Test
+    fun `Unit Test - Wrong DS100 Regex`() {
+        val responseOne = mvc.get("/api/v1/distance/A/FF").andExpect {
+            status { isBadRequest() }
+        }
+
+        val responseTwo = mvc.get("/api/v1/distance/FF/A").andExpect {
             status { isBadRequest() }
         }
     }
