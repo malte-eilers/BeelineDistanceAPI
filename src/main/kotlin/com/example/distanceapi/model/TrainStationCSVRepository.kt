@@ -7,13 +7,17 @@ import com.example.distanceapi.exception.TrainStationTypeException
 import com.example.distanceapi.model.data.TrainStation
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
+import java.io.FileNotFoundException
 import java.io.InputStream
 
 @Repository
 @Qualifier("CSVDatasource")
 class TrainStationCSVRepository(val csvDataSourceConfig: CSVDataSourceConfig): TrainStationRepository {
 
-    private fun loadInputStream(): InputStream = this::class.java.getResourceAsStream(csvDataSourceConfig.fileName) ?: throw Exception("Whatever")
+    init {
+        loadInputStream()
+    }
+    private fun loadInputStream(): InputStream = this::class.java.getResourceAsStream(csvDataSourceConfig.fileName) ?: throw FileNotFoundException("Datasource '${csvDataSourceConfig.fileName}' is missing!")
 
     @Override
     override fun findTrainStationByDSCode(id: String, stationType: TrainStationType): TrainStation {
